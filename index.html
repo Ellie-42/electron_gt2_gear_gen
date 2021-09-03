@@ -10,13 +10,13 @@
 
     <meta property="og:url"           content="https://avtehnik.github.io/gt2-gear-genaretor/" />
     <meta property="og:type"          content="website" />
-    <meta property="og:title"         content="Gcode box generator" />
-    <meta property="og:description"   content="Generate box for laser cutter or download drawing" />
-    <meta property="og:image"         content="https://avtehnik.github.io/gt2-gear-genaretor/pict0.jpeg" />
-    <meta property="og:image:url"     content="https://avtehnik.github.io/gt2-gear-genaretor/pict0.jpeg" />
+    <meta property="og:title"         content="GT2 Pulley Generator" />
+    <meta property="og:description"   content="Generate GT2 Pulley to your specification, and then save as GCode or DXF" />
+    <meta property="og:image"         content="https://github.com/Ellie-42/electron_gt2_gear_gen/pict0.jpeg" />
+    <meta property="og:image:url"     content="https://github.com/Ellie-42/electron_gt2_gear_gen/pict0.jpeg" />
 
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:image" content="https://avtehnik.github.io/gt2-gear-genaretor/pict0.jpeg"/>
+    <meta property="twitter:image" content="https://github.com/Ellie-42/electron_gt2_gear_gen/pict0.jpeg"/>
 
 
 
@@ -60,7 +60,7 @@
     </style>
 </head>
 <body>
-<a href="https://github.com/avtehnik/gt2-gear-genaretor"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+<a href="https://github.com/Ellie-42/electron_gt2_gear_gen"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
 <div class="settings">
     <legend id="params">
         <label for="params">Settings</label>
@@ -111,11 +111,10 @@
         <label for="export">Export</label>
 
         <div>
-            <button onclick="dataExport('dxf');">DXF</button>
+            <button onclick="dataExport('.dxf');">DXF</button>
             <!--<button>SVG</button>-->
-            <button onclick="dataExport('g-code');">G code</button>
+            <button onclick="dataExport('.gcode');">G code</button>
         </div>
-        <textarea id="g-code"></textarea>
     </legend>
 </div>
 <script src="js/three.js"></script>
@@ -281,25 +280,44 @@
 
     }
 
+	function download(data, filename, type) {
+		var file = new Blob([data], {type: type});
+		if (window.navigator.msSaveOrOpenBlob) // IE10+
+			window.navigator.msSaveOrOpenBlob(file, filename, type);
+		else { // Others
+			var a = document.createElement("a"),
+					url = URL.createObjectURL(file);
+			a.href = url;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(function() {
+				document.body.removeChild(a);
+				window.URL.revokeObjectURL(url);  
+			}, 0); 
+		}
+		}
+	
 
     function dataExport(type) {
-        textarea.value = "";
-
+        var fileData = ""
+		var fileName = "GT2_"+settings.numberOfTeeth+"T_"+settings.centralHole+"mm-bore" + type
+		
         var offsetX = 0;
         var offsetY = 0;
         var exporter = {};
 
-        if (type == 'g-code') {
+        if (type == 'gcode') {
             exporter = gcodeExporter;
 
-            textarea.value += "G90\n";
-            textarea.value += "S" + settings.laserPower + "\n";
-            textarea.value += "G0 X0.000 Y0.000 F" + settings.workSpeed + "\n";
+            fileData += "G90\n";
+            fileData += "S" + settings.laserPower + "\n";
+            fileData += "G0 X0.000 Y0.000 F" + settings.workSpeed + "\n";
             shapesForExport.forEach(function (shape) {
-                textarea.value += exporter[shape.type](shape, settings);
+                fileData += exporter[shape.type](shape, settings);
             });
-            textarea.value += "G0 X0.000 Y0.000\n";
-            textarea.value += "M2\n";
+            fileData += "G0 X0.000 Y0.000\n";
+            fileData += "M2\n";
         } else if (type == 'dxf') {
             DxfExporter.reset();
             exporter = dxfExporterProxy;
@@ -307,9 +325,9 @@
                 exporter[shape.type](shape, settings);
             });
 
-            textarea.value = DxfExporter.export();
-
+            fileData = DxfExporter.export();
         }
+		download(fileData,fileName,type)
     }
     var textarea = document.getElementById('g-code');
 
@@ -769,22 +787,5 @@
         renderer.render(scene, camera);
     }
 </script>
-<script>
-    (function (i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function () {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date();
-        a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
-    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-
-    ga('create', 'UA-90392164-1', 'auto');
-    ga('send', 'pageview');
-</script>
-<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5891902795361a67"></script>
 </body>
 </html>
