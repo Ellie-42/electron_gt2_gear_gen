@@ -1,0 +1,23 @@
+{
+  "name": "GT2_Gear_Generator",
+  "version": "1.0.0",
+  "description": "A desktop interface for the GT2 Pulley Generator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/Ellie-42/electron_gt2_gear_gen",
+  "keywords": [
+    "Electron",
+    "qt2",
+    "pulley",
+    "timer pulley",
+    "3d printer",
+	"pulley design"
+  ],
+  "author": "EL42 Technologies, LLC",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^14.0.0"
+  }
+}
